@@ -10,10 +10,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const canvas = new fabric.Canvas('c');
   const circle = new fabric.Circle({
-    radius: 100,
+    radius: 10,
     fill: '#ff5724',
-    left: 100,
-    top: 100,
+    // left: , // center
+    left: (canvas?.width || 10) / 2,
+    top: (canvas?.height || 10) / 2,
   });
 
   canvas.add(circle);

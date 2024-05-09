@@ -15452,10 +15452,10 @@ document.addEventListener("DOMContentLoaded", function() {
   canvasElement.style.border = "1px solid black";
   const canvas = new import_fabric.fabric.Canvas("c");
   const circle = new import_fabric.fabric.Circle({
-    radius: 100,
+    radius: 10,
     fill: "#ff5724",
-    left: 100,
-    top: 100
+    left: (canvas?.width || 10) / 2,
+    top: (canvas?.height || 10) / 2
   });
   canvas.add(circle);
 });
