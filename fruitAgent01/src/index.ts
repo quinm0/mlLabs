@@ -7,14 +7,13 @@ document.addEventListener('DOMContentLoaded', function () {
     throw new Error('Canvas element not found');
   }
   canvasElement.style.border = '1px solid black';
+  const canvas = new fabric.StaticCanvas('c');
 
-  const canvas = new fabric.Canvas('c');
   const circle = new fabric.Circle({
     radius: 10,
     fill: '#ff5724',
-    // left: , // center
-    left: (canvas?.width || 10) / 2,
-    top: (canvas?.height || 10) / 2,
+    left: (canvas.getWidth() || 10) / 2,
+    top: (canvas.getHeight() || 10) / 2,
   });
 
   canvas.add(circle);
