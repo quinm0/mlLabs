@@ -1,32 +1,35 @@
-import { fabric } from 'fabric';
+import Phaser from 'phaser';
 import listenForRefresh from './websocketListener';
-import { Agent } from './agent';
 
 listenForRefresh();
 
-document.addEventListener('DOMContentLoaded', function () {
-  // wrap the canvas in a boarder to see the canvas
-  const canvasElement = document.getElementById('c');
-  if (!canvasElement) {
-    throw new Error('Canvas element not found');
-  }
-  canvasElement.style.border = '1px solid black';
-  const canvas = new fabric.StaticCanvas('c');
+var config = {
+  type: Phaser.AUTO,
+  width: 800,
+  height: 600,
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 200, x: 0 },
+    },
+  },
+  scene: {
+    preload: preload,
+    create: create,
+    update: update,
+  },
+};
 
-  const agent = new Agent();
-  canvas.add(agent);
+var game = new Phaser.Game(config);
 
-  console.log('sussy baka');
+function preload() {
+  this.load.image('fruit', 'path/to/fruit.png');
+}
 
-  // every 100ms call agent.goForward
-  // setInterval(() => {
-  //   agent.goForward();
-  //   canvas.renderAll();
-  // }, 100);
+function create() {
+  this.fruit = this.physics.add.image(400, 300, 'fruit');
+}
 
-  //call canvas.renderAll() to render the canvas 60 times a second
-  setInterval(() => {
-    agent.tick();
-    canvas.renderAll();
-  }, 1000);
-});
+function update() {
+  // Logic to move the fruit or respond to ML model's decisions
+}
