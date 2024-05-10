@@ -14,14 +14,19 @@ document.addEventListener('DOMContentLoaded', function () {
   const canvas = new fabric.StaticCanvas('c');
 
   const agent = new Agent();
-
   canvas.add(agent);
 
-  agent.animateSetAngle(0);
-  agent.goForward();
-  agent.animateSetAngle(90);
-  agent.goForward();
-  agent.animateSetAngle(180);
-  agent.goForward();
-  console.log('done');
+  console.log('sussy baka');
+
+  // every 100ms call agent.goForward
+  // setInterval(() => {
+  //   agent.goForward();
+  //   canvas.renderAll();
+  // }, 100);
+
+  //call canvas.renderAll() to render the canvas 60 times a second
+  setInterval(() => {
+    agent.tick();
+    canvas.renderAll();
+  }, 1000);
 });
