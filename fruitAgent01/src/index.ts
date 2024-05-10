@@ -1,4 +1,8 @@
 import { fabric } from 'fabric';
+import listenForRefresh from './websocketListener';
+import { Agent } from './agent';
+
+listenForRefresh();
 
 document.addEventListener('DOMContentLoaded', function () {
   // wrap the canvas in a boarder to see the canvas
@@ -9,25 +13,15 @@ document.addEventListener('DOMContentLoaded', function () {
   canvasElement.style.border = '1px solid black';
   const canvas = new fabric.StaticCanvas('c');
 
-  const circle = new fabric.Circle({
-    radius: 10,
-    fill: '#ff5724',
-    left: (canvas.getWidth() || 10) / 2,
-    top: (canvas.getHeight() || 10) / 2,
-  });
+  const agent = new Agent();
 
-  canvas.add(circle);
-});
+  canvas.add(agent);
 
-// Connect to websocket server
-const ws = new WebSocket('ws://localhost:8080');
-
-ws.addEventListener('message', (event) => {
-  // Listen for server.publish('server-event', 'recompile');
-  const message = event.data;
-  console.log('Received message:', message);
-  if (message === 'recompile') {
-    console.log('Reloading browser...');
-    window.location.reload();
-  }
+  agent.animateSetAngle(0);
+  agent.goForward();
+  agent.animateSetAngle(90);
+  agent.goForward();
+  agent.animateSetAngle(180);
+  agent.goForward();
+  console.log('done');
 });
