@@ -1,10 +1,12 @@
 import Phaser from "phaser";
 import listenForRefresh from "./websocketListener";
 import { Agent } from "./agent";
+import { Point } from "./point";
 listenForRefresh();
 
 class SimpleGame extends Phaser.Scene {
   private agent!: Agent;
+  private points: Point[] = [];
 
   constructor() {
     super({
@@ -16,6 +18,14 @@ class SimpleGame extends Phaser.Scene {
 
   create() {
     this.agent = new Agent(this, 400, 300);
+
+    // Create 10 random points randomly on the screen
+    for (let i = 0; i < 10; i++) {
+      const x = Phaser.Math.Between(0, this.cameras.main.width);
+      const y = Phaser.Math.Between(0, this.cameras.main.height);
+      const point = new Point(this, x, y);
+      this.points.push(point);
+    }
   }
 
   update() {
