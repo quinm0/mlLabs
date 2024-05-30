@@ -12,8 +12,10 @@ export class Point extends Phaser.Physics.Arcade.Sprite {
 
     super(scene, x, y, textureKey);
 
-    scene.physics.add.existing(this);
     scene.add.existing(this);
+    scene.physics.add.existing(this);
+    this.setImmovable(true);
+    this.setPushable(false);
   }
 
   update(...args: any[]): void {}
