@@ -1,10 +1,10 @@
 import Phaser from "phaser";
 import listenForRefresh from "./websocketListener";
+import { Agent } from "./agent";
 listenForRefresh();
 
 class SimpleGame extends Phaser.Scene {
-  private player!: Phaser.Physics.Arcade.Sprite;
-  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+  private agent!: Agent;
 
   constructor() {
     super({
@@ -12,35 +12,14 @@ class SimpleGame extends Phaser.Scene {
     });
   }
 
-  preload() {
-    this.load.image("player", "user.png");
-  }
+  preload() {}
 
   create() {
-    this.player = this.physics.add.sprite(200, 100, "player");
-    this.cursors = this.input.keyboard?.createCursorKeys()!;
+    this.agent = new Agent(this, 400, 300);
   }
 
   update() {
-    if (this.cursors.left.isDown) {
-      this.player.setVelocityX(-160);
-    } else if (this.cursors.right.isDown) {
-      this.player.setVelocityX(160);
-    } else {
-      this.player.setVelocityX(0);
-    }
-
-    if (this.cursors.up.isDown) {
-      this.player.setVelocityY(-160);
-    } else if (this.cursors.down.isDown) {
-      this.player.setVelocityY(160);
-    } else {
-      this.player.setVelocityY(0);
-    }
-
-    if (this.cursors.space.isDown) {
-      this.player.setScale(this.player.scale * 1.1);
-    }
+    this.agent.update();
   }
 }
 
@@ -53,7 +32,8 @@ const config: Phaser.Types.Core.GameConfig = {
     default: "arcade",
     arcade: {
       gravity: { y: 0, x: 0 },
-      debug: false,
+
+      debug: true,
     },
   },
   scene: SimpleGame,
