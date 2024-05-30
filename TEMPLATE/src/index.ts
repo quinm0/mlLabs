@@ -1,34 +1,62 @@
-import { fabric } from 'fabric';
+import Phaser from "phaser";
+import listenForRefresh from "./websocketListener";
+listenForRefresh();
 
-document.addEventListener('DOMContentLoaded', function () {
-  // wrap the canvas in a boarder to see the canvas
-  const canvasElement = document.getElementById('c');
-  if (!canvasElement) {
-    throw new Error('Canvas element not found');
+class SimpleGame extends Phaser.Scene {
+  private player!: Phaser.Physics.Arcade.Sprite;
+  private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+
+  constructor() {
+    super({
+      key: SimpleGame.name,
+    });
   }
-  canvasElement.style.border = '1px solid black';
 
-  const canvas = new fabric.Canvas('c');
-
-  const circle = new fabric.Circle({
-    radius: 100,
-    fill: '#ff5724',
-    left: 100,
-    top: 100,
-  });
-
-  canvas.add(circle);
-});
-
-// Connect to websocket server
-const ws = new WebSocket('ws://localhost:8080');
-
-ws.addEventListener('message', (event) => {
-  // Listen for server.publish('server-event', 'recompile');
-  const message = event.data;
-  console.log('Received message:', message);
-  if (message === 'recompile') {
-    console.log('Reloading browser...');
-    window.location.reload();
+  preload() {
+    this.load.image("player", "user.png");
   }
-});
+
+  create() {
+    this.player = this.physics.add.sprite(200, 100, "player");
+    this.cursors = this.input.keyboard?.createCursorKeys()!;
+  }
+
+  update() {
+    if (this.cursors.left.isDown) {
+      this.player.setVelocityX(-160);
+    } else if (this.cursors.right.isDown) {
+      this.player.setVelocityX(160);
+    } else {
+      this.player.setVelocityX(0);
+    }
+
+    if (this.cursors.up.isDown) {
+      this.player.setVelocityY(-160);
+    } else if (this.cursors.down.isDown) {
+      this.player.setVelocityY(160);
+    } else {
+      this.player.setVelocityY(0);
+    }
+
+    if (this.cursors.space.isDown) {
+      this.player.setScale(this.player.scale * 1.1);
+    }
+  }
+}
+
+const config: Phaser.Types.Core.GameConfig = {
+  type: Phaser.AUTO,
+  width: 800,
+  height: 600,
+  parent: "content",
+  physics: {
+    default: "arcade",
+    arcade: {
+      gravity: { y: 0, x: 0 },
+      debug: false,
+    },
+  },
+  scene: SimpleGame,
+};
+
+const game = new Phaser.Game(config);
