@@ -1,5 +1,7 @@
 export class Agent extends Phaser.Physics.Arcade.Sprite {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+  private debugGraphics?: Phaser.GameObjects.Graphics;
+  private debugVisionEnabled: boolean = true;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     const textureKey = "playerCircle";
@@ -13,6 +15,7 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
 
     super(scene, x, y, textureKey);
     this.cursors = scene.input.keyboard?.createCursorKeys()!;
+    this.debugGraphics = scene.add.graphics();
 
     scene.physics.add.existing(this);
     scene.add.existing(this);
@@ -33,6 +36,60 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
       this.setVelocityY(160);
     } else {
       this.setVelocityY(0);
+    }
+
+    this.updateDebugVision();
+  }
+
+  toggleDebugVision(): void {
+    this.debugVisionEnabled = !this.debugVisionEnabled;
+    if (!this.debugVisionEnabled) {
+      this.debugGraphics?.clear();
+    }
+  }
+
+  private updateDebugVision(): void {
+    if (this.debugVisionEnabled) {
+      this.debugGraphics?.clear();
+      const points = (this.scene as any).points.getChildren();
+      const lineColor = 0x0000ff; // default blue color
+      const overlapColor = 0xff0000; // red color for overlap
+
+      // Function to check overlap with points
+      const checkOverlap = (
+        x1: number,
+        y1: number,
+        x2: number,
+        y2: number
+      ): boolean => {
+        const lineRect = new Phaser.Geom.Rectangle(
+          Math.min(x1, x2),
+          Math.min(y1, y2),
+          Math.abs(x2 - x1),
+          Math.abs(y2 - y1)
+        );
+
+        const overlappingPoints = points;
+
+        console.log("Overlapping points:", overlappingPoints);
+        return overlappingPoints;
+      };
+
+      // Draw lines in four directions with color change on overlap
+      const drawLine = (x1: number, y1: number, x2: number, y2: number) => {
+        const isOverlapping = checkOverlap(x1, y1, x2, y2);
+        this.debugGraphics?.lineStyle(
+          2,
+          isOverlapping ? overlapColor : lineColor,
+          0.5
+        );
+        this.debugGraphics?.lineBetween(x1, y1, x2, y2);
+      };
+
+      drawLine(this.x, this.y, this.x + 100, this.y); // Right
+      drawLine(this.x, this.y, this.x - 100, this.y); // Left
+      drawLine(this.x, this.y, this.x, this.y + 100); // Down
+      drawLine(this.x, this.y, this.x, this.y - 100); // Up
     }
   }
 }
