@@ -27,27 +27,17 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
   }
 
   update(...args: any[]): void {
-    let dx = 0;
-    let dy = 0;
-
     if (this.cursors.left.isDown) {
-      dx -= 160;
+      this.takeAction(180, true);
     }
     if (this.cursors.right.isDown) {
-      dx += 160;
+      this.takeAction(0, true);
     }
-    this.setVelocityX(dx);
-
     if (this.cursors.up.isDown) {
-      dy -= 160;
+      this.takeAction(270, true);
     }
     if (this.cursors.down.isDown) {
-      dy += 160;
-    }
-    this.setVelocityY(dy);
-
-    if (dx !== 0 || dy !== 0) {
-      this.currentAngle = Phaser.Math.RadToDeg(Math.atan2(dy, dx));
+      this.takeAction(90, true);
     }
 
     this.updateVisionLogic();
@@ -129,30 +119,18 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
     });
   }
 
-  public takeAction(action: number): void {
-    switch (action) {
-      case 0: // Move left
-        this.x -= 1;
-        break;
-      case 1: // Move right
-        this.x += 1;
-        break;
-      case 2: // Move forward
-        this.y -= 1;
-        break;
-      case 3: // Move backward
-        this.y += 1;
-        break;
-      default:
-        console.log("Invalid action");
+  public takeAction(angle: number, travelForward: boolean): void {
+    this.currentAngle = angle;
+    if (travelForward) {
+      this.x += this.visionRadius * Math.cos(Phaser.Math.DegToRad(angle));
+      this.y += this.visionRadius * Math.sin(Phaser.Math.DegToRad(angle));
     }
+    this.currentAngle = Phaser.Math.Wrap(this.currentAngle, 0, 360);
     this.updateVisionLinesState();
   }
 
   private updateVisionLinesState(): void {
-    // Update the vision lines state based on the new position
-    // This is a placeholder, implement according to your game logic
-    this.visionLinesState = {}; // Reset and update based on new position
+    this.updateVisionLogic(); // Recalculate vision lines based on new angle and position
   }
 
   public calculateReward(): number {
