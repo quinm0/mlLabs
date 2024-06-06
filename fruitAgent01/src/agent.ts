@@ -3,12 +3,13 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
   private debugGraphics?: Phaser.GameObjects.Graphics;
   private debugVisionEnabled: boolean = true;
   public visionLinesState: { [direction: string]: boolean } = {};
-  private currentAngle: number = 0;
   public visionLineCount: number = 5;
+  private currentAngle: number = 0;
   private visionRadius: number = 100;
   private visionAngle: number = 90;
+  private speed: number; // Configurable speed
 
-  constructor(scene: Phaser.Scene, x: number, y: number) {
+  constructor(scene: Phaser.Scene, x: number, y: number, speed: number = 2) {
     const textureKey = "playerCircle";
     if (!scene.textures.exists(textureKey)) {
       const graphics = scene.add.graphics();
@@ -21,23 +22,33 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
     super(scene, x, y, textureKey);
     this.cursors = scene.input.keyboard?.createCursorKeys()!;
     this.debugGraphics = scene.add.graphics();
+    this.speed = speed;
 
     scene.physics.add.existing(this);
     scene.add.existing(this);
   }
 
   update(...args: any[]): void {
+    let xDirection = 0;
+    let yDirection = 0;
+
     if (this.cursors.left.isDown) {
-      this.takeAction(180, true);
+      xDirection -= 1;
     }
     if (this.cursors.right.isDown) {
-      this.takeAction(0, true);
+      xDirection += 1;
     }
     if (this.cursors.up.isDown) {
-      this.takeAction(270, true);
+      yDirection -= 1;
     }
     if (this.cursors.down.isDown) {
-      this.takeAction(90, true);
+      yDirection += 1;
+    }
+
+    // Calculate the angle based on the direction vectors
+    if (xDirection !== 0 || yDirection !== 0) {
+      const angle = Math.atan2(yDirection, xDirection) * (180 / Math.PI);
+      this.takeAction(angle, true);
     }
 
     this.updateVisionLogic();
@@ -80,7 +91,6 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
   private updateDebugVision(): void {
     if (this.debugVisionEnabled) {
       this.debugGraphics?.clear();
-      const points = (this.scene as any).points.getChildren();
       const lineColor = 0x0000ff;
       const overlapColor = 0xff0000;
 
@@ -122,8 +132,8 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
   public takeAction(angle: number, travelForward: boolean): void {
     this.currentAngle = angle;
     if (travelForward) {
-      this.x += this.visionRadius * Math.cos(Phaser.Math.DegToRad(angle));
-      this.y += this.visionRadius * Math.sin(Phaser.Math.DegToRad(angle));
+      this.x += this.speed * Math.cos(Phaser.Math.DegToRad(angle));
+      this.y += this.speed * Math.sin(Phaser.Math.DegToRad(angle));
     }
     this.currentAngle = Phaser.Math.Wrap(this.currentAngle, 0, 360);
     this.updateVisionLinesState();
