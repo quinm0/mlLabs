@@ -46,8 +46,7 @@ class SimpleGame extends Phaser.Scene {
   }
 
   handlePlayerPointCollision(player: Agent, point: Point) {
-    point.setRandomPosition();
-    console.log("Player overlapped with point");
+    point.destroy();
   }
 }
 
