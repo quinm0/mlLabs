@@ -7,6 +7,9 @@ listenForRefresh();
 class SimpleGame extends Phaser.Scene {
   private agent!: Agent;
   private points!: Phaser.Physics.Arcade.Group;
+  private scoreboard!: Phaser.GameObjects.Text;
+
+  private score = 0;
 
   constructor() {
     super({
@@ -19,6 +22,7 @@ class SimpleGame extends Phaser.Scene {
   create() {
     this.points = this.physics.add.group();
     this.agent = new Agent(this, 400, 300);
+    this.scoreboard = this.add.text(10, 10, `Score: ${this.score}`);
 
     // Create 10 random points randomly on the screen
     for (let i = 0; i < 10; i++) {
@@ -43,10 +47,12 @@ class SimpleGame extends Phaser.Scene {
 
   update() {
     this.agent.update();
+    this.scoreboard.setText(`Score: ${this.score}`);
   }
 
   handlePlayerPointCollision(player: Agent, point: Point) {
     point.destroy();
+    this.score++;
   }
 }
 
