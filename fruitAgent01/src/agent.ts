@@ -2,12 +2,13 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private debugGraphics?: Phaser.GameObjects.Graphics;
   private debugVisionEnabled: boolean = true;
-  private visionLinesState: { [direction: string]: boolean } = {
-    up: false,
-    down: false,
-    left: false,
-    right: false,
+  public visionLinesState: { [direction: string]: boolean } = {
+    // Changed to public for external access
   };
+  private currentAngle: number = 0; // Added to track the current angle of the agent
+  private visionLineCount: number = 5; // Number of vision lines
+  private visionRadius: number = 100; // Radius for vision lines
+  private visionAngle: number = 90; // Degrees of vision
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     const textureKey = "playerCircle";
@@ -28,22 +29,31 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
   }
 
   update(...args: any[]): void {
+    let dx = 0;
+    let dy = 0;
+
     if (this.cursors.left.isDown) {
-      this.setVelocityX(-160);
-    } else if (this.cursors.right.isDown) {
-      this.setVelocityX(160);
-    } else {
-      this.setVelocityX(0);
+      dx -= 160;
     }
+    if (this.cursors.right.isDown) {
+      dx += 160;
+    }
+    this.setVelocityX(dx);
 
     if (this.cursors.up.isDown) {
-      this.setVelocityY(-160);
-    } else if (this.cursors.down.isDown) {
-      this.setVelocityY(160);
-    } else {
-      this.setVelocityY(0);
+      dy -= 160;
+    }
+    if (this.cursors.down.isDown) {
+      dy += 160;
+    }
+    this.setVelocityY(dy);
+
+    // Update the current angle based on the direction of movement
+    if (dx !== 0 || dy !== 0) {
+      this.currentAngle = Phaser.Math.RadToDeg(Math.atan2(dy, dx));
     }
 
+    this.updateVisionLogic();
     this.updateDebugVision();
   }
 
@@ -54,6 +64,32 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  setVisionAngle(degrees: number): void {
+    this.visionAngle = degrees;
+  }
+
+  private updateVisionLogic(): void {
+    const points = (this.scene as any).points.getChildren();
+    const halfAngle = this.visionAngle / 2;
+    const angleIncrement = this.visionAngle / (this.visionLineCount - 1);
+    for (let i = 0; i < this.visionLineCount; i++) {
+      const angleRad = Phaser.Math.DegToRad(
+        this.currentAngle - halfAngle + i * angleIncrement
+      );
+      const endX = this.x + this.visionRadius * Math.cos(angleRad);
+      const endY = this.y + this.visionRadius * Math.sin(angleRad);
+      const direction = `angle_${i * angleIncrement}`;
+      const isOverlapping = this.checkOverlap(
+        this.x,
+        this.y,
+        endX,
+        endY,
+        points
+      );
+      this.visionLinesState[direction] = isOverlapping;
+    }
+  }
+
   private updateDebugVision(): void {
     if (this.debugVisionEnabled) {
       this.debugGraphics?.clear();
@@ -61,48 +97,42 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
       const lineColor = 0x0000ff; // default blue color
       const overlapColor = 0xff0000; // red color for overlap
 
-      // Function to check overlap with points
-      const checkOverlap = (
-        x1: number,
-        y1: number,
-        x2: number,
-        y2: number
-      ): boolean => {
-        const lineRect = new Phaser.Geom.Rectangle(
-          Math.min(x1, x2),
-          Math.min(y1, y2),
-          Math.abs(x2 - x1),
-          Math.abs(y2 - y1)
+      const halfAngle = this.visionAngle / 2;
+      const angleIncrement = this.visionAngle / (this.visionLineCount - 1);
+      for (let i = 0; i < this.visionLineCount; i++) {
+        const angleRad = Phaser.Math.DegToRad(
+          this.currentAngle - halfAngle + i * angleIncrement
         );
-
-        return points.some((point: Phaser.GameObjects.GameObject) => {
-          // @ts-expect-error getBounds() is a function but the type is not correct
-          return Phaser.Geom.Rectangle.Overlaps(lineRect, point.getBounds());
-        });
-      };
-
-      // Draw lines in four directions with color change on overlap
-      const drawLine = (
-        x1: number,
-        y1: number,
-        x2: number,
-        y2: number,
-        direction: string
-      ) => {
-        const isOverlapping = checkOverlap(x1, y1, x2, y2);
-        this.visionLinesState[direction] = isOverlapping;
+        const endX = this.x + this.visionRadius * Math.cos(angleRad);
+        const endY = this.y + this.visionRadius * Math.sin(angleRad);
+        const isOverlapping =
+          this.visionLinesState[`angle_${i * angleIncrement}`];
         this.debugGraphics?.lineStyle(
           2,
           isOverlapping ? overlapColor : lineColor,
           0.5
         );
-        this.debugGraphics?.lineBetween(x1, y1, x2, y2);
-      };
-
-      drawLine(this.x, this.y, this.x + 100, this.y, "right"); // Right
-      drawLine(this.x, this.y, this.x - 100, this.y, "left"); // Left
-      drawLine(this.x, this.y, this.x, this.y + 100, "down"); // Down
-      drawLine(this.x, this.y, this.x, this.y - 100, "up"); // Up
+        this.debugGraphics?.lineBetween(this.x, this.y, endX, endY);
+      }
     }
+  }
+
+  private checkOverlap(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    points: Phaser.GameObjects.GameObject[]
+  ): boolean {
+    return points.some((point: Phaser.GameObjects.GameObject) => {
+      const line = new Phaser.Geom.Line(x1, y1, x2, y2);
+      // @ts-expect-error getBounds() is a function but the type is not correct
+      const pointBounds = point.getBounds();
+      const pointCenter = new Phaser.Geom.Point(
+        pointBounds.centerX,
+        pointBounds.centerY
+      );
+      return Phaser.Geom.Intersects.LineToRectangle(line, pointBounds);
+    });
   }
 }
