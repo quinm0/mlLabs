@@ -2,20 +2,18 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private debugGraphics?: Phaser.GameObjects.Graphics;
   private debugVisionEnabled: boolean = true;
-  public visionLinesState: { [direction: string]: boolean } = {
-    // Changed to public for external access
-  };
-  private currentAngle: number = 0; // Added to track the current angle of the agent
-  private visionLineCount: number = 5; // Number of vision lines
-  private visionRadius: number = 100; // Radius for vision lines
-  private visionAngle: number = 90; // Degrees of vision
+  public visionLinesState: { [direction: string]: boolean } = {};
+  private currentAngle: number = 0;
+  public visionLineCount: number = 5;
+  private visionRadius: number = 100;
+  private visionAngle: number = 90;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     const textureKey = "playerCircle";
     if (!scene.textures.exists(textureKey)) {
       const graphics = scene.add.graphics();
-      graphics.fillStyle(0xff0000, 1); // Red color, fully opaque
-      graphics.fillCircle(25, 25, 25); // Draw a circle with radius 25
+      graphics.fillStyle(0xff0000, 1);
+      graphics.fillCircle(25, 25, 25);
       graphics.generateTexture(textureKey, 50, 50);
       graphics.destroy();
     }
@@ -48,7 +46,6 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
     }
     this.setVelocityY(dy);
 
-    // Update the current angle based on the direction of movement
     if (dx !== 0 || dy !== 0) {
       this.currentAngle = Phaser.Math.RadToDeg(Math.atan2(dy, dx));
     }
@@ -94,8 +91,8 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
     if (this.debugVisionEnabled) {
       this.debugGraphics?.clear();
       const points = (this.scene as any).points.getChildren();
-      const lineColor = 0x0000ff; // default blue color
-      const overlapColor = 0xff0000; // red color for overlap
+      const lineColor = 0x0000ff;
+      const overlapColor = 0xff0000;
 
       const halfAngle = this.visionAngle / 2;
       const angleIncrement = this.visionAngle / (this.visionLineCount - 1);
@@ -128,11 +125,54 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
       const line = new Phaser.Geom.Line(x1, y1, x2, y2);
       // @ts-expect-error getBounds() is a function but the type is not correct
       const pointBounds = point.getBounds();
-      const pointCenter = new Phaser.Geom.Point(
-        pointBounds.centerX,
-        pointBounds.centerY
-      );
       return Phaser.Geom.Intersects.LineToRectangle(line, pointBounds);
     });
+  }
+
+  public takeAction(action: number): void {
+    switch (action) {
+      case 0: // Move left
+        this.x -= 1;
+        break;
+      case 1: // Move right
+        this.x += 1;
+        break;
+      case 2: // Move forward
+        this.y -= 1;
+        break;
+      case 3: // Move backward
+        this.y += 1;
+        break;
+      default:
+        console.log("Invalid action");
+    }
+    this.updateVisionLinesState();
+  }
+
+  private updateVisionLinesState(): void {
+    // Update the vision lines state based on the new position
+    // This is a placeholder, implement according to your game logic
+    this.visionLinesState = {}; // Reset and update based on new position
+  }
+
+  public calculateReward(): number {
+    if (this.meetsGoalCondition()) {
+      return 10; // Reward for achieving goal
+    } else if (this.hitsObstacle()) {
+      return -10; // Penalty for hitting an obstacle
+    }
+    return -1; // Small penalty for each move to encourage efficiency
+  }
+
+  private meetsGoalCondition(): boolean {
+    // Check if the agent meets the goal condition
+    // Placeholder logic
+    return false;
+  }
+
+  private hitsObstacle(): boolean {
+    // Check if the agent hits an obstacle
+    // Placeholder logic
+    return false; // Implement based on your game's map
   }
 }
