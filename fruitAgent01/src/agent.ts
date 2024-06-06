@@ -2,6 +2,12 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private debugGraphics?: Phaser.GameObjects.Graphics;
   private debugVisionEnabled: boolean = true;
+  private visionLinesState: { [direction: string]: boolean } = {
+    up: false,
+    down: false,
+    left: false,
+    right: false,
+  };
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     const textureKey = "playerCircle";
@@ -69,15 +75,22 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
           Math.abs(y2 - y1)
         );
 
-        const overlappingPoints = points;
-
-        console.log("Overlapping points:", overlappingPoints);
-        return overlappingPoints;
+        return points.some((point: Phaser.GameObjects.GameObject) => {
+          // @ts-expect-error getBounds() is a function but the type is not correct
+          return Phaser.Geom.Rectangle.Overlaps(lineRect, point.getBounds());
+        });
       };
 
       // Draw lines in four directions with color change on overlap
-      const drawLine = (x1: number, y1: number, x2: number, y2: number) => {
+      const drawLine = (
+        x1: number,
+        y1: number,
+        x2: number,
+        y2: number,
+        direction: string
+      ) => {
         const isOverlapping = checkOverlap(x1, y1, x2, y2);
+        this.visionLinesState[direction] = isOverlapping;
         this.debugGraphics?.lineStyle(
           2,
           isOverlapping ? overlapColor : lineColor,
@@ -86,10 +99,10 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
         this.debugGraphics?.lineBetween(x1, y1, x2, y2);
       };
 
-      drawLine(this.x, this.y, this.x + 100, this.y); // Right
-      drawLine(this.x, this.y, this.x - 100, this.y); // Left
-      drawLine(this.x, this.y, this.x, this.y + 100); // Down
-      drawLine(this.x, this.y, this.x, this.y - 100); // Up
+      drawLine(this.x, this.y, this.x + 100, this.y, "right"); // Right
+      drawLine(this.x, this.y, this.x - 100, this.y, "left"); // Left
+      drawLine(this.x, this.y, this.x, this.y + 100, "down"); // Down
+      drawLine(this.x, this.y, this.x, this.y - 100, "up"); // Up
     }
   }
 }
