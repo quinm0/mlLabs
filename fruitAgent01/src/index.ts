@@ -29,9 +29,9 @@ class SimpleGame extends Phaser.Scene {
 
   private score = 0;
 
-  constructor() {
+  constructor(key: string) {
     super({
-      key: SimpleGame.name,
+      key: key,
     });
   }
 
@@ -107,11 +107,10 @@ const config: Phaser.Types.Core.GameConfig = {
     default: "arcade",
     arcade: {
       gravity: { y: 0, x: 0 },
-
       debug: true,
     },
   },
-  scene: SimpleGame,
+  scene: [new SimpleGame("simulation1"), new SimpleGame("simulation2")],
 };
 
 initializeTF().then(() => {
