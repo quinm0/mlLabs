@@ -160,13 +160,13 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
   ): number {
     let closestDistance = this.visionRadius;
     points.forEach((point: Phaser.GameObjects.GameObject) => {
+      const sprite = point as Phaser.GameObjects.Sprite; // Cast to Sprite
       const line = new Phaser.Geom.Line(x1, y1, x2, y2);
-      // @ts-expect-error getBounds() is a function but the type is not correct
-      const pointBounds = point.getBounds();
+      const pointBounds = sprite.getBounds();
       if (Phaser.Geom.Intersects.LineToRectangle(line, pointBounds)) {
         const distance =
-          Phaser.Math.Distance.Between(x1, y1, point.x, point.y) -
-          point.width / 2;
+          Phaser.Math.Distance.Between(x1, y1, sprite.x, sprite.y) -
+          sprite.width / 2;
         if (distance < closestDistance) {
           closestDistance = distance;
         }
