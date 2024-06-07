@@ -18,7 +18,7 @@ export class AgentEnvironment {
       tf.layers.dense({
         units: 256,
         activation: "relu",
-        inputShape: [this.agent.visionLineCount],
+        inputShape: [this.agent.visionLineCount + 1],
       })
     );
     model.add(tf.layers.dense({ units: 128, activation: "relu" }));
@@ -125,10 +125,10 @@ export class AgentEnvironment {
     // Sample a batch from the stored transitions
     // This is a placeholder, implement according to your memory storage
     return {
-      states: tf.tensor2d([]),
+      states: tf.tensor2d([], [0, this.agent.visionLineCount + 1]),
       actions: [],
       rewards: [],
-      nextStates: tf.tensor2d([]),
+      nextStates: tf.tensor2d([], [0, this.agent.visionLineCount + 1]),
     };
   }
 }

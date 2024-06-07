@@ -9,7 +9,7 @@ export class Agent extends Phaser.Physics.Arcade.Sprite {
 
   public visionLinesState: { [direction: string]: boolean } = {};
   public sensorData: { distance: number; direction: number }[] = [];
-  public visionLineCount: number = 5;
+  public visionLineCount: number = 20;
   private currentAngle: number = 0;
   private visionRadius: number = 75;
   private visionAngle: number = 90;
