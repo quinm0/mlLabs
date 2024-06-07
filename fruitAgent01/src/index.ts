@@ -21,7 +21,11 @@ class SimpleGame extends Phaser.Scene {
 
   create() {
     this.points = this.physics.add.group();
-    this.agent = new Agent(this, 400, 300);
+    this.agent = new Agent(this, 400, 300, undefined, {
+      vision: true,
+      data: true,
+      console: false,
+    });
     this.scoreboard = this.add.text(10, 10, `Score: ${this.score}`);
 
     // Create 10 random points randomly on the screen

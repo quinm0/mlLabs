@@ -81,7 +81,7 @@ class AgentEnvironment {
 
   private performAction(action: number): number {
     // Perform the action using the agent and return the reward
-    this.agent.takeAction(action);
+    this.agent.takeAction(action, true);
     return this.calculateReward();
   }
 
@@ -91,10 +91,27 @@ class AgentEnvironment {
   }
 
   private getVisionState(): number[] {
-    // Convert visionLinesState to an array of numbers (0 or 1)
-    return Object.values(this.agent.visionLinesState).map((state) =>
-      state ? 1 : 0
+    // Enhanced state representation
+    const distances = this.getDistancesToPoints(); // implemented method
+    const directionToNearestPoint = this.getDirectionToNearestPoint(); // implemented method
+    return [...distances, directionToNearestPoint];
+  }
+
+  private getDistancesToPoints(): number[] {
+    // Implementation to get distances to points
+    return this.agent
+      .getSensorData()
+      .map((sensor: { distance: number }) => sensor.distance);
+  }
+
+  private getDirectionToNearestPoint(): number {
+    // Implementation to get direction to the nearest point
+    const sensorData = this.agent.getSensorData();
+    const nearestSensor = sensorData.reduce(
+      (prev: { distance: number }, curr: { distance: number }) =>
+        prev.distance < curr.distance ? prev : curr
     );
+    return nearestSensor.direction;
   }
 
   private sampleFromMemory(): {
