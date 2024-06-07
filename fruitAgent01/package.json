@@ -8,11 +8,13 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "start": "bun run index.ts"
+    "start": "bun run index.ts",
+    "postinstall": "cp node_modules/@tensorflow/tfjs-backend-wasm/dist/*.wasm public/"
   },
   "type": "module",
   "dependencies": {
     "@tensorflow/tfjs": "^4.20.0",
+    "@tensorflow/tfjs-backend-wasm": "^4.20.0",
     "phaser": "^3.80.1"
   },
   "trustedDependencies": [

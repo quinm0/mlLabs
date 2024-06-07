@@ -1,7 +1,7 @@
 import * as tf from "@tensorflow/tfjs";
 import { Agent } from "./agent";
 
-class AgentEnvironment {
+export class AgentEnvironment {
   private agent: Agent;
   private model: tf.Sequential;
   private optimizer: tf.Optimizer;
@@ -99,17 +99,19 @@ class AgentEnvironment {
 
   private getDistancesToPoints(): number[] {
     // Implementation to get distances to points
-    return this.agent
-      .getSensorData()
-      .map((sensor: { distance: number }) => sensor.distance);
+    return this.agent.sensorData.map(
+      (sensor: { distance: number }) => sensor.distance
+    );
   }
 
   private getDirectionToNearestPoint(): number {
     // Implementation to get direction to the nearest point
-    const sensorData = this.agent.getSensorData();
+    const sensorData = this.agent.sensorData;
     const nearestSensor = sensorData.reduce(
-      (prev: { distance: number }, curr: { distance: number }) =>
-        prev.distance < curr.distance ? prev : curr
+      (
+        prev: { distance: number; direction: number },
+        curr: { distance: number; direction: number }
+      ) => (prev.distance < curr.distance ? prev : curr)
     );
     return nearestSensor.direction;
   }
